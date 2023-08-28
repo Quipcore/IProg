@@ -9,17 +9,31 @@ import java.net.Socket;
 import java.util.Arrays;
 
 public class Server {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
+
         int port = 8080;
-        ServerSocket serverSocket = new ServerSocket(port);
+        ServerSocket serverSocket;
+        try {
+            serverSocket = new ServerSocket(port);
+        }catch (Exception e){
+            System.out.println("Couldn't start server!");
+            return;
+        }
+
         System.out.printf("Created server on: %s and port: %d\n", serverSocket.getLocalSocketAddress(), serverSocket.getLocalPort());
 
         Socket clientSocket;
         while(true){
             clientSocket = getClient(serverSocket);
             System.out.printf("Client connected from: %s and port: %d\n", clientSocket.getInetAddress(), clientSocket.getPort());
-            communicate(clientSocket);
-            System.out.printf("Client disconnected from: %s and port: %d\n", clientSocket.getInetAddress(), clientSocket.getPort());
+
+            try {
+                communicate(clientSocket);
+                System.out.printf("Client disconnected from: %s and port: %d\n", clientSocket.getInetAddress(), clientSocket.getPort());
+            }catch (Exception e){
+                System.out.println("Something went wrong in communication. Trying to reconnect!");
+            }
+
         }
 
     }
