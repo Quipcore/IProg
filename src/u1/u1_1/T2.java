@@ -16,7 +16,7 @@ public class T2 implements Runnable{
     public void run() {
         while(!t.isInterrupted()){
             try {
-                t.sleep(1000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 interrupt();
             }
