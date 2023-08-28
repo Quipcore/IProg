@@ -5,6 +5,10 @@ public class T1 extends Thread{
         super();
     }
 
+
+    /**
+     * This method is called when the thread is started.
+     */
     @Override
     public void run() {
         while(!isInterrupted()){
