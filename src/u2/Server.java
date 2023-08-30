@@ -4,14 +4,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Server {
-    public static void main(String[] args){
 
-        int port = 8080;
+    public static void main(String[] args) throws UnknownHostException {
+        int port = args.length >= 1 ? Integer.parseInt(args[0]) : 2000;
+
         ServerSocket serverSocket;
         try {
             serverSocket = new ServerSocket(port);
@@ -20,48 +25,15 @@ public class Server {
             return;
         }
 
-        System.out.printf("Created server on: %s and port: %d\n", serverSocket.getLocalSocketAddress(), serverSocket.getLocalPort());
-
-        Socket clientSocket;
+        serverSocket.getInetAddress();
+        System.out.printf("Created server on: %s and port: %d\n", InetAddress.getLocalHost().getHostName(), serverSocket.getLocalPort());
+        List<ServerThread> serverThreads = new ArrayList<>();
+        int MAX_THREADS = 3;
         while(true){
-            clientSocket = getClient(serverSocket);
+            Socket clientSocket = getClient(serverSocket);
             System.out.printf("Client connected from: %s and port: %d\n", clientSocket.getInetAddress(), clientSocket.getPort());
-
-            try {
-                communicate(clientSocket);
-                System.out.printf("Client disconnected from: %s and port: %d\n", clientSocket.getInetAddress(), clientSocket.getPort());
-            }catch (Exception e){
-                System.out.println("Something went wrong in communication. Trying to reconnect!");
-            }
-
+            Thread serverThread = new ServerThread(clientSocket);
         }
-
-    }
-
-    private static void communicate(Socket clientSocket) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-
-        while(!clientSocket.isClosed()){
-            String inMessage = readMessages(in);
-            if(inMessage.equals("exit")){
-                clientSocket.close();
-                return;
-            }
-            sendMessages(out);
-        }
-    }
-
-    private static void sendMessages(PrintWriter out) {
-        String message = "ACK";
-        System.out.printf("<Server> %s\n",message);
-        out.println(message);
-    }
-
-    private static String readMessages(BufferedReader in) throws IOException {
-        String message = in.readLine();
-        System.out.printf("<Client> %s\n",message);
-        return message;
     }
 
     private static Socket getClient(ServerSocket serverSocket) {

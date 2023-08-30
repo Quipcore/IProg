@@ -4,17 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) {
-//        String host = "127.0.0.1";
-//        int port = 2000;
-
-        //String host = "192.168.86.250";
-        String host = "192.168.86.36";
-        int port = 8080;
+        String host = "127.0.0.1"; //DEFAULT HOST
+        int port = 2000; //DEFAULT PORT
 
         switch (args.length){
             case 2:
@@ -22,12 +21,10 @@ public class Client {
             case 1:
                 host = args[0];
                 break;
-            default:
-                break;
         }
 
         while(true){
-            Socket socket = createSocketConnection(host, port);;
+            Socket socket = createSocketConnection(host, port);
 
             System.out.printf("Connected to %s:%d\n",host, port);
 
