@@ -1,4 +1,4 @@
-package u1.u1_1;
+package assignment_1.multithreading;
 
 public class T2 implements Runnable{
     private Thread t;

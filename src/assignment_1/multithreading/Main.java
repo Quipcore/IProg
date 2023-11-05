@@ -1,4 +1,4 @@
-package u1.u1_1;
+package assignment_1.multithreading;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {

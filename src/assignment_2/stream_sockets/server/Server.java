@@ -1,21 +1,20 @@
-package u2;
+package assignment_2.stream_sockets.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Server {
 
+    private static final int STANDARD_PORT = 2000;
+
     public static void main(String[] args) throws UnknownHostException {
-        int port = args.length >= 1 ? Integer.parseInt(args[0]) : 2000;
+        int port = args.length >= 1 ? Integer.parseInt(args[0]) : STANDARD_PORT;
 
         ServerSocket serverSocket;
         try {
@@ -32,7 +31,22 @@ public class Server {
         while(true){
             Socket clientSocket = getClient(serverSocket);
             System.out.printf("Client connected from: %s and port: %d\n", clientSocket.getInetAddress(), clientSocket.getPort());
+
             Thread serverThread = new ServerThread(clientSocket);
+
+            if(serverThreads.size() < MAX_THREADS) {
+                serverThreads.add((ServerThread) serverThread);
+                serverThread.start();
+            }else{
+                System.out.println("Server is full!");
+                try {
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    out.println("Server is full!");
+                    clientSocket.close();
+                } catch (IOException e) {
+                    System.out.println("Failed to send message to client");
+                }
+            }
         }
     }
 

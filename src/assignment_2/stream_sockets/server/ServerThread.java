@@ -1,4 +1,4 @@
-package u2;
+package assignment_2.stream_sockets.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
