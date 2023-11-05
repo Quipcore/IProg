@@ -1,19 +1,18 @@
 package assignment_1.multithreading;
 
 public class T1 extends Thread{
+
+    private long timeoutMiliseconds = 1000L;
+
     public T1() {
-        super();
+        start();
     }
 
-
-    /**
-     * This method is called when the thread is started.
-     */
     @Override
     public void run() {
         while(!isInterrupted()){
             try {
-                sleep(1000);
+                sleep(timeoutMiliseconds);
             } catch (InterruptedException e) {
                 interrupt();
             }
