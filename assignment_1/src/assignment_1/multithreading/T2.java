@@ -1,5 +1,8 @@
 package assignment_1.multithreading;
 
+/**
+ * Threading class that implements the {@link Runnable} interface
+ */
 public class T2 implements Runnable{
     private Thread thread = new Thread(this);
     private boolean alive;
@@ -8,13 +11,16 @@ public class T2 implements Runnable{
 
 
     /**
-     * Automatically starts the thread when calling the constructor.
+     * Create and starts a new {@link Thread}. This will also set interrupt flag low
      */
     public T2() {
         this.alive = true;
         this.thread.start();
     }
 
+    /**
+     * Prints "Tråd 2" until interrupted
+     */
     @Override
     public void run() {
         while(alive){
@@ -27,6 +33,9 @@ public class T2 implements Runnable{
         }
    }
 
+    /**
+     * Sets interrupt flag for {@link T2#run()}
+     */
     public void interrupt() {
         alive = false;
     }
