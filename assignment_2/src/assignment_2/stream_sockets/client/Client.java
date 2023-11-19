@@ -11,14 +11,12 @@ public class Client {
         String host = DEFAULT_HOST;
         int port = DEFAULT_PORT;
 
-
         switch (args.length){
             case 2:
                 port = Integer.parseInt(args[1]);
             case 1:
                 host = args[0];
         }
-
 
         startClient(host, port);
     }
