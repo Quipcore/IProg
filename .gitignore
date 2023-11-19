@@ -1,5 +1,6 @@
 ### Other ###
 *.iml
+**/old/
 
 
 ### IntelliJ IDEA ###
