@@ -5,23 +5,36 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ServerThread extends Thread{
     private final static char COMMAND_SYMBOL = '/';
     private final Socket client;
-    //private final Scanner scanner;
     private final PrintWriter out;
     private final BufferedReader in;
+    private static Set<ServerThread> threadPool;
 
     public ServerThread(Socket client) throws IOException {
         this.client = client;
         printClientInfo(client);
-
-        //this.scanner = new Scanner(System.in);
+        if(threadPool == null){
+            threadPool = Collections.synchronizedSet(new HashSet<>());
+        }
+        threadPool.add(this);
         this.out = new PrintWriter(client.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
         start();
+    }
+
+    public static int connectionCount() {
+        if(threadPool == null){
+            return 0;
+        }
+        return threadPool.size();
     }
 
     private void printClientInfo(Socket client) {
@@ -36,31 +49,27 @@ public class ServerThread extends Thread{
         }catch (Exception e){
             System.out.println("Something went wrong in communication");
         }
+
+        threadPool.remove(this);
+        System.out.println("Removed "  + this);
     }
 
-    private static void communicate(Socket clientSocket) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-
+    private void communicate(Socket clientSocket) throws IOException {
         while(!clientSocket.isClosed()){
-            String message = readMessage(in);
+            String message = this.in.readLine();
+            System.out.printf("<Client> %s\n",message);
             if(message.equals("exit")){
                 clientSocket.close();
                 return;
             }
-            sendMessages(out);
+
+            for(ServerThread serverThread : threadPool){
+                serverThread.sendMessage(message);
+            }
         }
     }
 
-    private static void sendMessages(PrintWriter out) {
-        String message = "ACK";
-        System.out.printf("<Server> %s\n",message);
-        out.println(message);
-    }
-
-    private static String readMessage(BufferedReader in) throws IOException {
-        String message = in.readLine();
-        System.out.printf("<Client> %s\n",message);
-        return message;
+    private void sendMessage(String message) {
+        this.out.println(message);
     }
 }
