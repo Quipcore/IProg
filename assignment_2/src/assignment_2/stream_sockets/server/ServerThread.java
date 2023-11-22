@@ -64,6 +64,9 @@ public class ServerThread extends Thread{
             }
 
             for(ServerThread serverThread : threadPool){
+                if(serverThread.equals(this)){
+                    continue;
+                }
                 serverThread.sendMessage(message);
             }
         }
