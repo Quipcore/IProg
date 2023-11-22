@@ -1,13 +1,18 @@
 package assignment_2.stream_sockets.client;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Client {
 
     private static final String DEFAULT_HOST = "127.0.0.1";
     private static final int DEFAULT_PORT = 2000;
+    private static int threadExitCode;
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
         String host = DEFAULT_HOST;
         int port = DEFAULT_PORT;
 
@@ -18,21 +23,46 @@ public class Client {
                 host = args[0];
         }
 
+        threadExitCode = -1;
         startClient(host, port);
     }
+    private static void startClient(String host, int port) throws IOException {
+        while (threadExitCode != 0) {
+            Socket socket = createSocketConnection(host, port);
+            System.out.printf("Connected to %s:%d\n", host, port);
 
-    private static void startClient(String host, int port) {
-        try(Socket socketToServer = new Socket(host, port)){
-            if(!socketToServer.isConnected()){
-                System.out.printf("Failed to connect to %s:%d\n",host, port);
-                System.exit(1);
+            try {
+                communicate(socket);
+                System.out.printf("Client disconnected from: %s and port: %d\n", socket.getInetAddress(), socket.getPort());
+            } catch (Exception e) {
+                socket.close();
+                System.out.println("Something went wrong in communication. Trying to reconnect!");
             }
-            System.out.printf("Connected to %s:%d\n",host, port);
-            MessageReceiver messageReceiver = new MessageReceiver(socketToServer);
-            MessageSender messageSender = new MessageSender(socketToServer);
-
-        }catch (Exception e) {
-            throw new RuntimeException(e);
         }
+    }
+
+    private static void communicate(Socket socket) throws IOException, InterruptedException {
+        MessageReceiver messageReceiver = new MessageReceiver(socket);
+        MessageSender messageSender = new MessageSender(socket);
+
+        messageSender.join();
+        messageReceiver.join();
+
+        if(messageSender.getExitCode() == messageReceiver.getExitCode()){
+            threadExitCode = messageSender.getExitCode();
+        }
+    }
+
+    private static Socket createSocketConnection(String host, int port) {
+        Socket socket = null;
+        while (socket == null) {
+            try {
+                socket = new Socket(host, port);
+            } catch (Exception e) {
+                System.out.printf("Failed to connect to %s:%d\n", host, port);
+            }
+        }
+
+        return socket;
     }
 }

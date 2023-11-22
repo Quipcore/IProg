@@ -18,9 +18,9 @@ public class Server {
             System.out.printf("Created server on: %s and port: %d\n", hostAddress, serverSocket.getLocalPort());
             List<ServerThread> serverThreads = new ArrayList<>();
             while(true){
+                removeDeadThreads(serverThreads);
                 Socket client = serverSocket.accept();
                 serverThreads.add(new ServerThread(client));
-                removeDeadThreads(serverThreads);
             }
         }catch (Exception e){
             throw new RuntimeException(e);
@@ -28,6 +28,15 @@ public class Server {
     }
 
     private static void removeDeadThreads(List<ServerThread> serverThreads) {
-        serverThreads.removeIf(serverThread -> !serverThread.isAlive());
+        serverThreads.removeIf(serverThread -> {
+
+            boolean isDead = !serverThread.isAlive();
+            if(isDead){
+                System.out.printf("Removing: %s \n",serverThread);
+                return true;
+            }
+
+            return false;
+        });
     }
 }

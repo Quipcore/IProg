@@ -5,12 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ServerThread extends Thread{
     private final static char COMMAND_SYMBOL = '/';
     private final Socket client;
-    private final Scanner scanner;
+    //private final Scanner scanner;
     private final PrintWriter out;
     private final BufferedReader in;
 
@@ -18,7 +17,7 @@ public class ServerThread extends Thread{
         this.client = client;
         printClientInfo(client);
 
-        this.scanner = new Scanner(System.in);
+        //this.scanner = new Scanner(System.in);
         this.out = new PrintWriter(client.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
@@ -31,26 +30,37 @@ public class ServerThread extends Thread{
 
     @Override
     public void run() {
-        String message = "";
-        while(!isCommand("EXIT",message)){
-            message = readMessage();
-            respondToMessage(message);
+        try {
+            communicate(client);
+            System.out.printf("Client disconnected from: %s and port: %d\n", client.getInetAddress(), client.getPort());
+        }catch (Exception e){
+            System.out.println("Something went wrong in communication");
         }
     }
 
-    private boolean isCommand(String command, String message) {
-        if(!message.startsWith(String.valueOf(COMMAND_SYMBOL))){
-            return false;
+    private static void communicate(Socket clientSocket) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+        while(!clientSocket.isClosed()){
+            String message = readMessage(in);
+            if(message.equals("exit")){
+                clientSocket.close();
+                return;
+            }
+            sendMessages(out);
         }
-
-        return message.equals(COMMAND_SYMBOL + command);
     }
 
-    private void respondToMessage(String message) {
-
+    private static void sendMessages(PrintWriter out) {
+        String message = "ACK";
+        System.out.printf("<Server> %s\n",message);
+        out.println(message);
     }
 
-    private String readMessage() {
-        return "";
+    private static String readMessage(BufferedReader in) throws IOException {
+        String message = in.readLine();
+        System.out.printf("<Client> %s\n",message);
+        return message;
     }
 }
