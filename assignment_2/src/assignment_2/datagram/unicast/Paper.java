@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.HashSet;
 
 public class Paper extends JPanel {
-    private HashSet<Point> hs = new HashSet<>();
+    private HashSet<Point> points = new HashSet<>();
 
     public Paper(){
         setBackground(Color.WHITE);
@@ -16,13 +16,13 @@ public class Paper extends JPanel {
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         g.setColor(Color.BLACK);
-        for(Point p : hs){
+        for(Point p : points){
             g.fillOval(p.x,p.y,2,2);
         }
     }
 
     protected void addPoint(Point p){
-        hs.add(p);
+        points.add(p);
         repaint();
     }
 }
