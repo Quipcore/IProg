@@ -1,9 +1,7 @@
 package assignment_2.datagram.unicast;
 
-import javax.xml.crypto.Data;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 
 public class Main {
 

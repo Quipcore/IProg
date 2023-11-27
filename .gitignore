@@ -1,6 +1,7 @@
 ### Other ###
 *.iml
 **/old/
+**/password
 
 
 ### IntelliJ IDEA ###
