@@ -10,6 +10,8 @@ module net.examclient {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires java.xmlbuilder;
+    requires org.jdom2;
 
     opens net.examclient to javafx.fxml;
     exports net.examclient;

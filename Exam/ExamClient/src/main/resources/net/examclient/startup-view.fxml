@@ -6,9 +6,19 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
+            fx:controller="net.examclient.StartupViewController"
+            prefHeight="400.0" prefWidth="600.0"
+            alignment="CENTER" spacing="20.0">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        </padding>
 
-</AnchorPane>
+
+        <HBox alignment="CENTER">
+            <Button fx:id="connectBtn" text="Connect" onAction="#onConnectButtonClick"/>
+            <TextField fx:id="addressField"/>
+        </HBox>
+</VBox>

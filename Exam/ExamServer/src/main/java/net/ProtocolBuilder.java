@@ -1,6 +1,5 @@
-package net.examclient;
+package net;
 
-import com.jamesmurty.utils.XMLBuilder;
 import com.jamesmurty.utils.XMLBuilder2;
 
 public class ProtocolBuilder {
