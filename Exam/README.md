@@ -1,7 +1,7 @@
 # Description
 ## Protocol
 ### Commands
-|Command|Short|
+|Description|Command|
 |:-----|:---:|
 |Active matches| ACTIVE |
 |Match history| HISTORY |
