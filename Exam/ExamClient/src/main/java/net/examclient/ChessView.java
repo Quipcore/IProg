@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,27 +54,12 @@ public class ChessView {
     }
 
     private List<ChessGame> getGamesFromXML(Document doc) {
-//        System.out.println(doc);
-//        Element response = doc.getRootElement();
-//        Element body = response.getChild("body");
-//        Element game = response.getChild("game");
-//
-//        System.out.println(body);
 
-        return doc.getContent().stream()
-                .filter(content -> content instanceof Element)
-                .map(content -> (Element)content)
-                .filter(element -> element.getName().equals("Response"))
-                .map(Element::getContent)
+        return doc.getRootElement()
+                .getChildren("body")
+                .stream()
+                .map(element -> element.getChildren("game"))
                 .flatMap(List::stream)
-                .filter(content -> content instanceof Element)
-                .map(content -> (Element)content)
-                .filter(elem -> elem.getName().equals("body"))
-                .map(Element::getContent)
-                .flatMap(List::stream)
-                .filter(content -> content instanceof Element)
-                .map(content -> (Element)content)
-                .filter(elem -> elem.getName().equals("game"))
                 .map(element -> {
                     String id = getChildElement(element, "id").getContent(0).getValue();
                     String fen = getChildElement(element, "fen").getContent(0).getValue();
