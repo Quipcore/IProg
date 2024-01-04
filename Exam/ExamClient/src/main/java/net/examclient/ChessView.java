@@ -1,25 +1,20 @@
 package net.examclient;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.jamesmurty.utils.*;
-import javafx.scene.layout.StackPane;
-import javafx.scene.web.WebView;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
@@ -50,37 +45,60 @@ public class ChessView {
     }
 
     public void displayActiveMatches(ActionEvent actionEvent) throws IOException, JDOMException, URISyntaxException {
-//        showHTMLPopup();
-        List<String> htmlLines = Files.readAllLines(Path.of(this.getClass().getResource("chessboard.html").toURI()))
-                .stream()
-                .map(String::trim)
-                .collect(Collectors.toList());
-        String html = String.join("",htmlLines);
-        System.out.println(html);
-        showHTMLPopup(html);
+        Document doc = getXMLDocumentFromServer(this.username,this.email,"ACTIVE");
+        List<ChessGame> games = getGamesFromXML(doc);
 
-//        Document doc = getXMLDocumentFromServer(this.username,this.email,"ACTIVE");
-//        System.out.println(doc);
+        games.forEach(System.out::println);
+        ChessGame chessGame = getSelectedMatchFromPopup(games);
     }
 
-    private void showHTMLPopup(String html) {
-        Stage popupStage = new Stage();
-        popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupStage.setTitle("HTML Popup");
+    private List<ChessGame> getGamesFromXML(Document doc) {
+//        System.out.println(doc);
+//        Element response = doc.getRootElement();
+//        Element body = response.getChild("body");
+//        Element game = response.getChild("game");
+//
+//        System.out.println(body);
 
-        WebView webView = new WebView();
-        webView.getEngine().loadContent(html);
+        return doc.getContent().stream()
+                .filter(content -> content instanceof Element)
+                .map(content -> (Element)content)
+                .filter(element -> element.getName().equals("Response"))
+                .map(Element::getContent)
+                .flatMap(List::stream)
+                .filter(content -> content instanceof Element)
+                .map(content -> (Element)content)
+                .filter(elem -> elem.getName().equals("body"))
+                .map(Element::getContent)
+                .flatMap(List::stream)
+                .filter(content -> content instanceof Element)
+                .map(content -> (Element)content)
+                .filter(elem -> elem.getName().equals("game"))
+                .map(element -> {
+                    String id = getChildElement(element, "id").getContent(0).getValue();
+                    String fen = getChildElement(element, "fen").getContent(0).getValue();
+                    String time = getChildElement(element, "time").getContent(0).getValue();
+                    Timestamp timestamp = new Timestamp(Integer.parseInt(time));
+                    String moves = getChildElement(element, "moves").getContent(0).getValue();
+                    return new ChessGame(id, fen,timestamp, moves);
+                })
+                .collect(Collectors.toList());
+    }
 
-        StackPane popupLayout = new StackPane();
-        popupLayout.getChildren().add(webView);
+    private ChessGame getSelectedMatchFromPopup(List<ChessGame> games) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Connection");
+        dialog.setHeaderText(String.format("Connection from %s to %s", "p0", "p1"));
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        Scene popupScene = new Scene(popupLayout, 400, 300);
-        popupStage.setScene(popupScene);
+        ListView<String> listView = new ListView<>();
+        listView.setItems(FXCollections.observableList(games.stream().map(Object::toString).collect(Collectors.toList())));
+        listView.setEditable(false);
+        dialog.getDialogPane().setContent(listView);
+        dialog.setResultConverter(dialogButton -> listView.getSelectionModel().getSelectedItems().getFirst());
 
-        // Position the popup relative to the main stage
-        popupStage.initOwner(getPrimaryStage());
-
-        popupStage.showAndWait();
+        System.out.println(dialog.showAndWait().orElse(null));
+        return null;
     }
 
     private Stage getPrimaryStage() {
@@ -106,7 +124,17 @@ public class ChessView {
         sender.println(xml);
 
         String message = receiver.readLine();
+        System.out.println(message);
         StringReader charStream = new StringReader(message);
         return new SAXBuilder().build(charStream);
+    }
+
+    private Element getChildElement(Element element, String name){
+        return element.getContent().stream()
+                .filter(content -> content instanceof Element)
+                .map(content -> (Element)content)
+                .filter(elem -> elem.getName().equals(name))
+                .findFirst()
+                .get();
     }
 }

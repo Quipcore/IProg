@@ -1,14 +1,14 @@
 package net;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 
 public class ServerThread extends Thread{
     private final static char COMMAND_SYMBOL = '/';
@@ -54,12 +54,12 @@ public class ServerThread extends Thread{
         System.out.println("Removed "  + this);
     }
 
-    private void communicate(Socket clientSocket) throws IOException {
+    private void communicate(Socket clientSocket) throws IOException, JDOMException {
         while(!clientSocket.isClosed()){
             String message = this.in.readLine();
             System.out.printf("<Client> %s\n",message);
 
-            String response = respondToMessage(message);
+            String response = respondToMessage(generateXMLFromString(message));
             this.out.println(response);
 
             if(message.equals("exit")){
@@ -69,11 +69,54 @@ public class ServerThread extends Thread{
         }
     }
 
-    private String respondToMessage(String message) {
+    private Document generateXMLFromString(String message) throws IOException, JDOMException {
+        StringReader charStream = new StringReader(message);
+        return new SAXBuilder().build(charStream);
+    }
+
+    private String respondToMessage(Document document) {
+
+        Element header = getChildElement(document.getRootElement(), "header");
+        Element protocol = getChildElement(header,"protocol");
+        String command = getChildElement(protocol,"command").getContent(0).getValue();
+
         ProtocolBuilder protocolBuilder = new ProtocolBuilder("Response")
-                .addHeader("","","RESPONSE")
-                .addBody();
+                .addHeader("server","","RESPONSE");
+
+        switch (command){
+            case "ACTIVE" -> getActiveRespons(document, protocolBuilder);
+            case "HISTORY" -> getUserHistory(document);
+            case null, default -> getUnkownRespons();
+        };
+
         return protocolBuilder.toString();
+    }
+
+    private String getUserHistory(Document document) {
+        return "";
+    }
+
+    private String getUnkownRespons() {
+        return "";
+    }
+
+    private String getActiveRespons(Document document, ProtocolBuilder protocolBuilder) {
+        protocolBuilder.addGame("1234567890", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "0987654321");
+//        return "<Game>" +
+//                "<id>1234567890<id/>" +
+//                "<fen>rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1<fen/>" +
+//                "<time>0987654321<time/>" +
+//                "<Game/>";
+        return "";
+    }
+
+    private Element getChildElement(Element element, String name){
+        return element.getContent().stream()
+                .filter(content -> content instanceof Element)
+                .map(content -> (Element)content)
+                .filter(elem -> elem.getName().equals(name))
+                .findFirst()
+                .get();
     }
 
     private void sendMessage(String message) {

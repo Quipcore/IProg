@@ -28,25 +28,22 @@ public class ProtocolBuilder {
         return this;
     }
 
-    public ProtocolBuilder addBody(){
-        //                .element("java-xmlbuilder")
-//                    .attribute("language", "Java")
-//                    .attribute("scm","SVN")
-//                    .element("Location")
-//                        .attribute("type", "URL")
-//                        .text("http://code.google.com/p/java-xmlbuilder/")
-//                        .up()
-//                    .up()
-//                .element("JetS3t")
-//                    .attribute("language", "Java")
-//                    .attribute("scm","CVS")
-//                    .element("Location")
-//                    .attribute("type", "URL")
-//                    .text("http://jets3t.s3.amazonaws.com/index.html");
-        xmlBuilder.element("body").up();
+    public ProtocolBuilder addBody(String response){
+        xmlBuilder.element("body").text(response).up();
         return this;
     }
 
+    public ProtocolBuilder addGame(String id, String fen, String time){
+        xmlBuilder.e("body")
+                    .e("game")
+                        .e("id").t(id).up()
+                        .e("fen").t(fen).up()
+                        .e("time").t(time).up()
+                        .e("moves").t("1.e4").up()
+                    .up()
+                .up();
+        return this;
+    }
     @Override
     public String toString() {
         return XML_HEADER + xmlBuilder.asString();

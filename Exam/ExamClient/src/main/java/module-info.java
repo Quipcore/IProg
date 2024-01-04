@@ -12,6 +12,7 @@ module net.examclient {
     requires com.almasb.fxgl.all;
     requires java.xmlbuilder;
     requires org.jdom2;
+    requires java.sql;
 
     opens net.examclient to javafx.fxml;
     exports net.examclient;
