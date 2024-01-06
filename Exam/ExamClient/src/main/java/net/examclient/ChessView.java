@@ -61,11 +61,11 @@ public class ChessView {
                 .map(element -> element.getChildren("game"))
                 .flatMap(List::stream)
                 .map(element -> {
-                    String id = getChildElement(element, "id").getContent(0).getValue();
-                    String fen = getChildElement(element, "fen").getContent(0).getValue();
-                    String time = getChildElement(element, "time").getContent(0).getValue();
+                    String id = element.getChild("id").getValue();
+                    String fen = element.getChild("fen").getValue();
+                    String time = element.getChild("time").getValue();
                     Timestamp timestamp = new Timestamp(Integer.parseInt(time));
-                    String moves = getChildElement(element, "moves").getContent(0).getValue();
+                    String moves = element.getChild("moves").getValue();
                     return new ChessGame(id, fen,timestamp, moves);
                 })
                 .collect(Collectors.toList());
