@@ -102,11 +102,10 @@ public class ServerThread extends Thread{
 
     private String getActiveRespons(Document document, ProtocolBuilder protocolBuilder) {
         protocolBuilder.addGame("1234567890", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "0987654321");
-//        return "<Game>" +
-//                "<id>1234567890<id/>" +
-//                "<fen>rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1<fen/>" +
-//                "<time>0987654321<time/>" +
-//                "<Game/>";
+
+
+
+
         return "";
     }
 

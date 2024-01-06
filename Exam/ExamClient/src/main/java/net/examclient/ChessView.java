@@ -3,6 +3,7 @@ package net.examclient;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 
 import java.io.*;
@@ -11,8 +12,10 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -29,6 +32,8 @@ public class ChessView {
 
     private String username = "";
     private String email = "";
+
+    private static final String  CHESS_NOTATION_REGEX = "(O-O|O-O-O|[NBRQK]?[a-h]?[1-8]?[x-]?[a-h][1-8][=#QNR]?[+#]?)";
 
     public void setSocket(Socket socket) throws IOException {
         receiver = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -97,8 +102,60 @@ public class ChessView {
     }
 
     public void startNewMatch(ActionEvent actionEvent) throws IOException, JDOMException {
-        Document doc = getXMLDocumentFromServer(this.username,this.email,"MATCH");
-        System.out.println(doc);
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Match");
+        dialog.setHeaderText("Start new match");
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField nameField = new TextField();
+        TextField timeField = new TextField();
+
+        grid.add(new Label("Email:"), 0, 0);
+        grid.add(nameField, 1, 0);
+
+        grid.add(new Label("First move:"), 0, 1);
+        grid.add(timeField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        AtomicBoolean isCanceled = new AtomicBoolean(false);
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton.getButtonData().isDefaultButton()) {
+                return new Pair<>(nameField.getText(), timeField.getText());
+            }
+            if (dialogButton.getButtonData().isCancelButton()) {
+                isCanceled.set(true);
+                return null;
+            }
+
+
+            return null;
+        });
+
+        Pair<String, String> dialogPair = dialog.showAndWait().orElse(null);
+        if (isCanceled.get()) {
+            return;
+        }
+
+        if (dialogPair == null
+                || dialogPair.getKey().isBlank()
+                || dialogPair.getValue().isBlank()
+                || !dialogPair.getValue().matches(CHESS_NOTATION_REGEX)) {
+            return;
+        }
+
+        Pair<String, String> emailMove = new Pair<>(dialogPair.getKey(), dialogPair.getValue());
+        System.out.println(emailMove);
+
+
+//        Document doc = getXMLDocumentFromServer(this.username,this.email,"MATCH");
+//        System.out.println(doc);
     }
 
     private Document getXMLDocumentFromServer(String username, String email, String command) throws IOException, JDOMException {
@@ -113,14 +170,5 @@ public class ChessView {
         System.out.println(message);
         StringReader charStream = new StringReader(message);
         return new SAXBuilder().build(charStream);
-    }
-
-    private Element getChildElement(Element element, String name){
-        return element.getContent().stream()
-                .filter(content -> content instanceof Element)
-                .map(content -> (Element)content)
-                .filter(elem -> elem.getName().equals(name))
-                .findFirst()
-                .get();
     }
 }
