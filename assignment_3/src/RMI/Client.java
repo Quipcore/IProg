@@ -1,26 +1,36 @@
 package RMI;
 
+import javax.management.remote.rmi.RMIServerImpl_Stub;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.swing.*;
 import java.awt.*;
 import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
+import java.rmi.*;
+import java.util.Properties;
 import java.util.Vector;
 
 //public class Client extends JFrame {
 public class Client {
 
-    public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException {
+    public static final int DSV_RMI_DEFAULT_PORT = 1099;
+    public static final String CONNECTION = "server";
 
-        System.setProperty("java.security.policy","assignment_3/src/RMI/policy");
+    public static final String DEFUALT_HOST = "atlas.dsv.su.se";
 
-        String host = "atlas.dsv.su.se";
-        String url = "rmi://" + host + "/";
-        RemoteServer  remoteServer = (RemoteServer)Naming.lookup(url + "server");
+    public static void main(String[] args) throws MalformedURLException, NotBoundException, RemoteException, NamingException {
+
+        String url = "rmi://" + DEFUALT_HOST + "/";
+
+        System.out.println();
+        Remote remote = Naming.lookup(url + "server");
+
+
+        RemoteServer  remoteServer = (RemoteServer)remote;
 
         Client client = new Client();
         client.run(remoteServer);
+
     }
 
     public Client(){

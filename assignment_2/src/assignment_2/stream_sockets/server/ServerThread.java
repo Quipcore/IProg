@@ -15,6 +15,8 @@ public class ServerThread extends Thread{
     private final BufferedReader in;
     private static Set<ServerThread> threadPool;
 
+    private static boolean echoMode = false;
+
     public ServerThread(Socket client) throws IOException {
         this.client = client;
         printClientInfo(client);
@@ -62,7 +64,7 @@ public class ServerThread extends Thread{
             }
 
             for(ServerThread serverThread : threadPool){
-                if(serverThread.equals(this)){
+                if(serverThread.equals(this) && !echoMode){
                     continue;
                 }
                 serverThread.sendMessage(message);

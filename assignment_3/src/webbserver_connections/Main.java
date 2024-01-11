@@ -6,8 +6,7 @@ import java.net.URISyntaxException;
 
 public class Main {
 
-    private static String liuTermin2SimpelHTML = "http://it-programmet.gitlab-pages.liu.se/termin2/index.html";
-    private static String urlString = liuTermin2SimpelHTML;
+    private static String urlString = "https://en.wikipedia.org/wiki/Main_Page";
     public static void main(String[] args) throws IOException, URISyntaxException {
         String text = WebbConnection.getText(urlString);
         System.out.println(text);

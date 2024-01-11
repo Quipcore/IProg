@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -39,12 +40,22 @@ public class Main {
             InternetAddress[] addresses = {new InternetAddress(username)};
 
             Message message = new MimeMessage(session);
+
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Recipient: ");
+            String recipient = scanner.nextLine();
+
+            System.out.print("Subject: ");
+            String subject = scanner.nextLine();
+
+            System.out.print("Message: ");
+            String text = scanner.nextLine();
             message.setRecipients(
                     Message.RecipientType.TO,
-                    InternetAddress.parse(username)
+                    InternetAddress.parse(recipient)
             );
-            message.setSubject("Testing Gmail TLS");
-            message.setText("Hello World!");
+            message.setSubject(subject);
+            message.setText(text);
 
             Transport.send(message);
 

@@ -17,7 +17,8 @@ import java.util.Objects;
 public class XMLClient{
 
 
-    static String DOCUMENT_URL = "https://atlas.dsv.su.se/~pierre/i/05_ass/ip1/2/2.1.3/message.dtd";
+    //TEMPLATE!!!
+    private static String DOCUMENT_URL = "https://atlas.dsv.su.se/~pierre/i/05_ass/ip1/2/2.1.3/message.dtd";
 
     private static final String DEFAULT_HOST = "127.0.0.1";
     private static final int DEFAULT_PORT = 2000;
@@ -34,21 +35,9 @@ public class XMLClient{
                 host = args[0];
         }
 
-        URL url = new URI(DOCUMENT_URL).toURL();
-        byte[] r = url.openStream().readAllBytes();
-        StringBuilder stringBuilder = new StringBuilder();
-        for(byte b: r){
-            stringBuilder.append((char)b);
-//            System.out.print((char)b);
-        }
-        System.out.println(stringBuilder);
-
-
-
         threadExitCode = -1;
 //        startClient("atlas.dsv.su.se",9494);
-//        startClient(host, port);
-        int nop = 0;
+        startClient(host, port);
     }
 
 
@@ -61,7 +50,6 @@ public class XMLClient{
 
             try {
                 communicate(socket);
-//                communicate();
                 System.out.printf("Client disconnected from: %s and port: %d\n", socket.getInetAddress(), socket.getPort());
                 if(!socket.isClosed()){
                     socket.close();
@@ -75,18 +63,9 @@ public class XMLClient{
 
     private static void communicate(Socket socket) throws IOException, InterruptedException {
         XMLReceiver messageReceiver = new XMLReceiver(socket);
-//        XMLSender messageSender = new XMLSender(socket);
+        XMLSender xmlSender = new XMLSender(socket);
 
-//        messageSender.join();
-        messageReceiver.join();
-        threadExitCode = messageReceiver.getExitCode();
-//        if(messageSender.getExitCode() == messageReceiver.getExitCode()){
-//            threadExitCode = messageSender.getExitCode();
-//        }
-    }
-
-    private static void communicate() throws InterruptedException {
-        XMLReceiver messageReceiver = new XMLReceiver();
+        xmlSender.join();
         messageReceiver.join();
         threadExitCode = messageReceiver.getExitCode();
     }
