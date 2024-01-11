@@ -2,10 +2,11 @@ package assignment_2.datagram.unicast;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashSet;
+import java.util.*;
+import java.util.List;
 
 public class Paper extends JPanel {
-    private HashSet<Point> points = new HashSet<>();
+    private final List<Point> points = new ArrayList<>();
 
     public Paper(){
         setBackground(Color.WHITE);
@@ -16,13 +17,18 @@ public class Paper extends JPanel {
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         g.setColor(Color.BLACK);
-        for(Point p : points){
+        for(int i = 0; i < points.size(); i++){
+            Point p = points.get(i);
             g.fillOval(p.x,p.y,2,2);
         }
     }
 
-    protected void addPoint(Point p){
+    public void addPoint(Point p){
         points.add(p);
         repaint();
+    }
+
+    public List<Point> getPoints(){
+        return points;
     }
 }
