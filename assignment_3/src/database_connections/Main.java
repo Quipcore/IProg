@@ -6,12 +6,11 @@ import java.nio.file.Path;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
 
-    private final static String DROP_ALL_TABLES = "SELECT CONCAT('DROP TABLE IF EXISTS `', TABLE_SCHEMA, '`.`', TABLE_NAME, '`;')\n" +
-            "FROM information_schema.TABLES\n" +
-            "WHERE TABLE_SCHEMA = 'mydb';";
+    private final static String DROP_GUESTBOOK = "DROP TABLE Guestbook";
 
     public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException, IOException {
         Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -25,21 +24,32 @@ public class Main {
         String url = "jdbc:mysql://" + computer + "/" + db_name;
         Connection dbConnetion = DriverManager.getConnection(url,user,password);
 
-//        dropGuestBook(dbConnetion);
+        dropGuestBook(dbConnetion);
         createTable(dbConnetion);
 
-        List<String> data = new ArrayList<>(List.of("Felix", "<feli8145@student.su.se>", "website.org", "Hello!"));
-        insertIntoTable(dbConnetion, data);
+        insertIntoTable(dbConnetion, getData());
         printGuestbook(dbConnetion);
 
+    }
+
+    private static List<String> getData() {
+        List<String> data = new ArrayList<>();
+        List<String> prompts = List.of("name","email","website","comment");
+        Scanner scanner = new Scanner(System.in);
+        for(String prompt: prompts){
+            System.out.printf("Enter %s: ",prompt);
+            data.add(scanner.nextLine());
+        }
+        scanner.close();
+        return data;
     }
 
     private static void dropGuestBook(Connection con) throws SQLException {
         con.createStatement().execute("DROP TABLE Guestbook");
     }
 
-    private static void dropAllTables(Connection con) throws SQLException {
-        con.createStatement().execute(DROP_ALL_TABLES);
+    private static void dropGuestbook(Connection con) throws SQLException {
+        con.createStatement().execute(DROP_GUESTBOOK);
     }
 
     private static void insertIntoTable(Connection con, List<String> data) throws SQLException {
@@ -52,7 +62,7 @@ public class Main {
 
         PreparedStatement preparedStatement = con.prepareStatement(query);
         for(int i = 0; i < data.size(); i++){
-            if(data.get(i).matches("<.*>")){
+            if(data.get(i).matches(".*<.*>.*")){
                 data.set(i, "CENSORED");
             }
             preparedStatement.setString(i+1, data.get(i));

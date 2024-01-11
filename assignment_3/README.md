@@ -1,0 +1,1 @@
+Password directory for credits that won't be stored on github
