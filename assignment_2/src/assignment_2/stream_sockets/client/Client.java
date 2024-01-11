@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.Socket;
 
 public class Client {
@@ -28,15 +29,20 @@ public class Client {
     }
     private static void startClient(String host, int port) throws IOException {
         while (threadExitCode != 0) {
-            Socket socket = createSocketConnection(host, port);
+            Socket socket;
+            try {
+                socket = new Socket(host, port);
+            }catch(ConnectException e){
+                System.out.printf("Failed to connect to %s:%d\n", host, port);
+                return;
+            }
+
             System.out.printf("Connected to %s:%d\n", host, port);
 
             try {
                 communicate(socket);
-                System.out.printf("Client disconnected from: %s and port: %d\n", socket.getInetAddress(), socket.getPort());
             } catch (Exception e) {
                 socket.close();
-                System.out.println("Something went wrong in communication. Trying to reconnect!");
             }
         }
     }
@@ -51,18 +57,5 @@ public class Client {
         if(messageSender.getExitCode() == messageReceiver.getExitCode()){
             threadExitCode = messageSender.getExitCode();
         }
-    }
-
-    private static Socket createSocketConnection(String host, int port) {
-        Socket socket = null;
-        while (socket == null) {
-            try {
-                socket = new Socket(host, port);
-            } catch (Exception e) {
-                System.out.printf("Failed to connect to %s:%d\n", host, port);
-            }
-        }
-
-        return socket;
     }
 }

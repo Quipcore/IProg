@@ -31,7 +31,6 @@ public class MessageSender extends Thread{
                 closeSocket();
             }
         }
-        System.out.println("Closing Sender");
         exitCode = 0;
     }
 

@@ -17,7 +17,7 @@ public class Server {
             String hostAddress = InetAddress.getLocalHost().getHostAddress();
             System.out.printf("Created server on: %s and port: %d\n", hostAddress, serverSocket.getLocalPort());
             while(true){
-                if(ServerThread.connectionCount() <= MAX_CONNECTION){
+                if(ServerThread.connectionCount() <= MAX_CONNECTION || MAX_CONNECTION == 0){
                     new ServerThread(serverSocket.accept());
                 }
             }

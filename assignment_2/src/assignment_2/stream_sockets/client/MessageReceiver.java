@@ -27,7 +27,6 @@ public class MessageReceiver extends Thread{
                 closeSocket();
             }
         }
-        System.out.println("Closing Reciver");
         exitCode = 0;
     }
 
