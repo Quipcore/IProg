@@ -218,7 +218,7 @@ public class ChessView {
 
         moveDialog.showAndWait().ifPresent(System.out::println);
 
-        //Send next over to server....
+        //Send next move over to server....
 
     }
     public void displayPreviousMatches(ActionEvent actionEvent) throws IOException, JDOMException {
