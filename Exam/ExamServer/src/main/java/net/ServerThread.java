@@ -102,11 +102,37 @@ public class ServerThread extends Thread{
             case "ACTIVE" -> getActiveRespons(document, protocolBuilder);
             case "HISTORY" -> getUserHistory(document, protocolBuilder);
             case "BEGIN","START" -> startGame(document, protocolBuilder);
+            case "MOVE" -> getMoves(document, protocolBuilder);
             case null, default -> getUnkownResponse();
         }
 
         System.out.println(protocolBuilder);
         return protocolBuilder.closeTag().toString();
+    }
+
+    private void getMoves(Document document, ProtocolBuilder protocolBuilder) throws SQLException {
+        String matchId = document.getRootElement()
+                .getChild("body")
+                .getChild("user")
+                .getChild("id")
+                .getValue();
+
+        String query = "SELECT * FROM `chessmoves` WHERE game_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1,matchId);
+
+        System.out.println(preparedStatement);
+        ResultSet resultSet = preparedStatement.executeQuery();
+
+        while (resultSet.next()){
+            int gameId = resultSet.getInt("game_id");
+            int turn = resultSet.getInt("turn");
+            String whiteMove = resultSet.getString("white_move");
+            String blackMove = resultSet.getString("black_move");
+
+            System.out.printf("%d, %d, %s, %s\n",gameId,turn,whiteMove,blackMove);
+            protocolBuilder.addMove(gameId, turn, whiteMove, blackMove);
+        }
     }
 
     private void startGame(Document document, ProtocolBuilder protocolBuilder) throws SQLException, MessagingException {

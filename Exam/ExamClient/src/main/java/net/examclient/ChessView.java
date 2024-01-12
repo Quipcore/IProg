@@ -108,16 +108,39 @@ public class ChessView {
         ListView<String> listView = new ListView<>(FXCollections.observableList(gamesFromXML.stream().map(ChessGame::toString).collect(Collectors.toList())));
         listView.setEditable(false);
         dialog.getDialogPane().setContent(listView);
-        dialog.setResultConverter(dialogButton -> listView.getSelectionModel().getSelectedItems().getFirst());
+        AtomicBoolean isCanceled = new AtomicBoolean(false);
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton.getButtonData().isDefaultButton()) {
+                return listView.getSelectionModel().getSelectedItems().getFirst();
+            }
+            if (dialogButton.getButtonData().isCancelButton()) {
+                isCanceled.set(true);
+                return null;
+            }
+            return null;
+        });
 
         String result = dialog.showAndWait().orElse(null);
+        if (isCanceled.get()) {
+            return;
+        }
 
+        if (result == null || result.isBlank()) {
+            return;
+        }
+
+        final int DEFAULT_GAME_ID = -1;
         int gameId = gamesFromXML.stream()
                 .filter(game -> game.toString().equals(result))
                 .map(ChessGame::getId)
                 .map(Integer::parseInt)
                 .findFirst()
-                .orElse(-1);
+                .orElse(DEFAULT_GAME_ID);
+
+        System.out.println(gameId);
+        if(gameId == DEFAULT_GAME_ID){
+            return;
+        }
 
         String moveXML = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 "<!DOCTYPE message>" +
@@ -135,18 +158,67 @@ public class ChessView {
                 "</header>" +
                 "<body>" +
                 "<user>" +
-                "<id>%d</username>" +
+                "<id>%d</id>" +
                 "</user>" +
                 "</body>" +
                 "</message>").formatted(this.username, this.email,gameId);
 
-        sender.println(activeXML);
+        sender.println(moveXML);
         String moveMessage = receiver.readLine();
         System.out.println(moveMessage);
         StringReader moveCarStream = new StringReader(moveMessage);
         Document moveDoc = new SAXBuilder().build(moveCarStream);
 
+        System.out.println(moveDoc);
 
+        String moveList = moveDoc.getRootElement()
+                .getChild("body")
+                .getChildren("move")
+                .stream()
+                .map(element -> {
+                    String turn = element.getChild("turn").getValue();
+                    String white = element.getChild("white").getValue();
+                    String black = element.getChild("black").getValue();
+
+                    System.out.println(turn + ", " + white + ", " + black);
+                    return turn + ", " + white + ", " + black;
+                }).reduce("", (accumulator, element) -> accumulator + "\n" + element);
+
+        Dialog<String> moveDialog = new TextInputDialog();
+        moveDialog.setTitle("Message");
+        moveDialog.setHeaderText("");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextArea textArea = new TextArea(moveList);
+        textArea.setEditable(false);
+        TextField activeMove = new TextField();
+
+        grid.add(new Label("Currently made moves:"), 0, 0);
+        grid.add(textArea, 1, 0);
+
+        grid.add(new Label("Next move:"), 0, 1);
+        grid.add(activeMove, 1, 1);
+
+        moveDialog.getDialogPane().setContent(grid);
+
+        moveDialog.setResultConverter(dialogButton -> {
+            if (dialogButton.getButtonData().isDefaultButton()) {
+                return activeMove.getText();
+            }
+            if (dialogButton.getButtonData().isCancelButton()) {
+                isCanceled.set(true);
+                return null;
+            }
+            return null;
+        });
+
+        moveDialog.showAndWait().ifPresent(System.out::println);
+
+        //Send next over to server....
 
     }
     public void displayPreviousMatches(ActionEvent actionEvent) throws IOException, JDOMException {
@@ -182,7 +254,7 @@ public class ChessView {
 
 
         String message = receiver.readLine();
-        System.out.println(message);
+//        System.out.println(message);
         StringReader charStream = new StringReader(message);
         Document doc = new SAXBuilder().build(charStream);
 
@@ -213,7 +285,8 @@ public class ChessView {
         dialog.getDialogPane().setContent(listView);
         dialog.setResultConverter(dialogButton -> listView.getSelectionModel().getSelectedItems().getFirst());
 
-        System.out.println(dialog.showAndWait().orElse(null));
+        String result = dialog.showAndWait().orElse(null);
+//        System.out.println(result);
     }
 
     public void startNewMatch(ActionEvent actionEvent) throws IOException, JDOMException {
@@ -263,7 +336,7 @@ public class ChessView {
         }
 
         Pair<String, String> oppenentPair = new Pair<>(dialogPair.getKey(), dialogPair.getValue());
-        System.out.println(oppenentPair);
+//        System.out.println(oppenentPair);
 
         String xml = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 "<!DOCTYPE message>" +

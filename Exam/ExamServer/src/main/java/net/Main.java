@@ -111,14 +111,17 @@ public class Main {
         dbConnection.createStatement().execute(createMainTable);
 
         //temp
-//        dbConnection.createStatement().execute("DROP TABLE IF EXISTS chessmoves");
+        dbConnection.createStatement().execute("DROP TABLE IF EXISTS chessmoves");
         String createMoveTable = "CREATE TABLE IF NOT EXISTS chessmoves(" +
                 "game_id INT PRIMARY KEY," +
-                "move INT," +
+                "turn INT," +
                 "white_move VARCHAR(255)," +
                 "black_move VARCHAR(255)" +
                 ")";
         dbConnection.createStatement().execute(createMoveTable);
+
+        String testData = "INSERT INTO chessmoves VALUES (2,1,'e4','e5')";
+        dbConnection.createStatement().execute(testData);
     }
 
     private Connection connectToDatabase() throws IOException, URISyntaxException, SQLException {
