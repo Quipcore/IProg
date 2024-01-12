@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE message>
+<message>
+    <header>
+        <protocol>
+            <type/>
+            <version>1.0</version>
+            <command>START</command>
+        </protocol>
+        <id>
+            <username>felix</username>
+            <email>felix.lido@gmail.com</email>
+        </id>
+    </header>
+    <body>
+        <challenger>
+            <username>felix01</username>
+            <email>felix.lido@gmail.com</email>
+        </challenger>
+        <opponent>
+            <username>felix02</username>
+            <email>felix.lido@gmail.com</email>
+        </opponent>
+    </body>
+</message>

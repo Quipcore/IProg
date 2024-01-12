@@ -2,9 +2,11 @@ package net;
 
 import com.jamesmurty.utils.XMLBuilder2;
 
+import java.sql.Timestamp;
+
 public class ProtocolBuilder {
 
-    XMLBuilder2 xmlBuilder;
+    private XMLBuilder2 xmlBuilder;
 
     private static final String XML_HEADER =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE message>";
@@ -28,24 +30,40 @@ public class ProtocolBuilder {
         return this;
     }
 
-    public ProtocolBuilder addBody(String response){
-        xmlBuilder.element("body").text(response).up();
+    public ProtocolBuilder addBody(){
+        xmlBuilder = xmlBuilder.e("body"); //Needs assignment for some reason! Probably a bug in the lib
+        return this;
+    }
+
+    public ProtocolBuilder closeTag(){
+        xmlBuilder.up();
         return this;
     }
 
     public ProtocolBuilder addGame(String id, String fen, String time){
-        xmlBuilder.e("body")
-                    .e("game")
-                        .e("id").t(id).up()
-                        .e("fen").t(fen).up()
-                        .e("time").t(time).up()
-                        .e("moves").t("1.e4").up()
-                    .up()
+        xmlBuilder.e("game")
+                    .e("id").t(id).up()
+                    .e("fen").t(fen).up()
+                    .e("time").t(time).up()
+                    .e("moves").t("1.e4").up()
                 .up();
         return this;
     }
     @Override
     public String toString() {
         return XML_HEADER + xmlBuilder.asString();
+    }
+
+    public ProtocolBuilder addGame(int gameId, String playerWhite, String playerBlack, String fenString, String result, boolean isActive, Timestamp gameDate) {
+        xmlBuilder.e("game")
+                        .e("id").t(String.valueOf(gameId)).up()
+                        .e("player_white").text(playerWhite).up()
+                        .e("player_black").text(playerBlack).up()
+                        .e("fen").t(fenString).up()
+                        .e("result").text(String.valueOf(result)).up()
+                        .e("is_active").text(String.valueOf(isActive)).up()
+                        .e("time").t(String.valueOf(gameDate)).up()
+                    .up();
+        return this;
     }
 }

@@ -51,54 +51,169 @@ public class ChessView {
     }
 
     public void displayActiveMatches(ActionEvent actionEvent) throws IOException, JDOMException, URISyntaxException {
-        Document doc = getXMLDocumentFromServer(this.username,this.email,"ACTIVE");
-        List<ChessGame> games = getGamesFromXML(doc);
 
-        games.forEach(System.out::println);
-        ChessGame chessGame = getSelectedMatchFromPopup(games);
-    }
+        TextInputDialog getUserDialogBox = new TextInputDialog();
+        getUserDialogBox.setTitle("ACTIVE");
+        getUserDialogBox.setHeaderText("");
+        getUserDialogBox.setContentText("User:");
+        String user = getUserDialogBox.showAndWait().orElse(null);
 
-    private List<ChessGame> getGamesFromXML(Document doc) {
+        String activeXML = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<!DOCTYPE message>" +
+                "<message>" +
+                "<header>" +
+                "<protocol>" +
+                "<type/>" +
+                "<version>1.0</version>" +
+                "<command>ACTIVE</command>" +
+                "</protocol>" +
+                "<id>" +
+                "<username>%s</username>" +
+                "<email>%s</email>" +
+                "</id>" +
+                "</header>" +
+                "<body>" +
+                "<user>" +
+                "<username>%s</username>" +
+                "</user>" +
+                "</body>" +
+                "</message>").formatted(this.username, this.email,user);
 
-        return doc.getRootElement()
-                .getChildren("body")
+        sender.println(activeXML);
+
+        String message = receiver.readLine();
+        System.out.println(message);
+        StringReader charStream = new StringReader(message);
+        Document doc = new SAXBuilder().build(charStream);
+
+        List<ChessGame> gamesFromXML = doc.getRootElement()
+                .getChild("body")
+                .getChildren("game")
                 .stream()
-                .map(element -> element.getChildren("game"))
-                .flatMap(List::stream)
                 .map(element -> {
                     String id = element.getChild("id").getValue();
+                    String player_white = element.getChild("player_white").getValue();
+                    String player_black = element.getChild("player_black").getValue();
                     String fen = element.getChild("fen").getValue();
+                    String is_active = element.getChild("is_active").getValue();
                     String time = element.getChild("time").getValue();
-                    Timestamp timestamp = new Timestamp(Integer.parseInt(time));
-                    String moves = element.getChild("moves").getValue();
-                    return new ChessGame(id, fen,timestamp, moves);
-                })
-                .collect(Collectors.toList());
-    }
+                    return new ChessGame(id,player_white,player_black,fen,is_active,time);
+                }).toList();
 
-    private ChessGame getSelectedMatchFromPopup(List<ChessGame> games) {
         Dialog<String> dialog = new Dialog<>();
-        dialog.setTitle("Connection");
-        dialog.setHeaderText(String.format("Connection from %s to %s", "p0", "p1"));
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setTitle("Games");
+        dialog.setHeaderText("");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,ButtonType.CANCEL);
 
-        ListView<String> listView = new ListView<>();
-        listView.setItems(FXCollections.observableList(games.stream().map(Object::toString).collect(Collectors.toList())));
+        ListView<String> listView = new ListView<>(FXCollections.observableList(gamesFromXML.stream().map(ChessGame::toString).collect(Collectors.toList())));
+        listView.setEditable(false);
+        dialog.getDialogPane().setContent(listView);
+        dialog.setResultConverter(dialogButton -> listView.getSelectionModel().getSelectedItems().getFirst());
+
+        String result = dialog.showAndWait().orElse(null);
+
+        int gameId = gamesFromXML.stream()
+                .filter(game -> game.toString().equals(result))
+                .map(ChessGame::getId)
+                .map(Integer::parseInt)
+                .findFirst()
+                .orElse(-1);
+
+        String moveXML = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<!DOCTYPE message>" +
+                "<message>" +
+                "<header>" +
+                "<protocol>" +
+                "<type/>" +
+                "<version>1.0</version>" +
+                "<command>MOVE</command>" +
+                "</protocol>" +
+                "<id>" +
+                "<username>%s</username>" +
+                "<email>%s</email>" +
+                "</id>" +
+                "</header>" +
+                "<body>" +
+                "<user>" +
+                "<id>%d</username>" +
+                "</user>" +
+                "</body>" +
+                "</message>").formatted(this.username, this.email,gameId);
+
+        sender.println(activeXML);
+        String moveMessage = receiver.readLine();
+        System.out.println(moveMessage);
+        StringReader moveCarStream = new StringReader(moveMessage);
+        Document moveDoc = new SAXBuilder().build(moveCarStream);
+
+
+
+    }
+    public void displayPreviousMatches(ActionEvent actionEvent) throws IOException, JDOMException {
+
+        TextInputDialog getUserDialogBox = new TextInputDialog();
+        getUserDialogBox.setTitle("History");
+        getUserDialogBox.setHeaderText("");
+        getUserDialogBox.setContentText("User:");
+        String user = getUserDialogBox.showAndWait().orElse(null);
+
+        String xml = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<!DOCTYPE message>" +
+                "<message>" +
+                    "<header>" +
+                        "<protocol>" +
+                            "<type/>" +
+                            "<version>1.0</version>" +
+                            "<command>HISTORY</command>" +
+                        "</protocol>" +
+                        "<id>" +
+                            "<username>%s</username>" +
+                            "<email>%s</email>" +
+                        "</id>" +
+                    "</header>" +
+                    "<body>" +
+                        "<user>" +
+                            "<username>%s</username>" +
+                        "</user>" +
+                    "</body>" +
+                "</message>").formatted(username, this.email,user);
+
+        sender.println(xml);
+
+
+        String message = receiver.readLine();
+        System.out.println(message);
+        StringReader charStream = new StringReader(message);
+        Document doc = new SAXBuilder().build(charStream);
+
+        List<String> gamesFromXML = doc.getRootElement()
+                .getChild("body")
+                .getChildren("game")
+                .stream()
+                .map(element -> {
+                    String id = element.getChild("id").getValue();
+                    String player_white = element.getChild("player_white").getValue();
+                    String player_black = element.getChild("player_black").getValue();
+                    String fen = element.getChild("fen").getValue();
+                    String is_active = element.getChild("is_active").getValue();
+                    String time = element.getChild("time").getValue();
+                    return new ChessGame(id,player_white,player_black,fen,is_active,time);
+                })
+                .map(ChessGame::toString)
+                .toList();
+
+
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Games");
+        dialog.setHeaderText("");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+
+        ListView<String> listView = new ListView<>(FXCollections.observableList(gamesFromXML));
         listView.setEditable(false);
         dialog.getDialogPane().setContent(listView);
         dialog.setResultConverter(dialogButton -> listView.getSelectionModel().getSelectedItems().getFirst());
 
         System.out.println(dialog.showAndWait().orElse(null));
-        return null;
-    }
-
-    private Stage getPrimaryStage() {
-        return (Stage) addressField.getScene().getRoot().getScene().getWindow();
-    }
-
-    public void displayPreviousMatches(ActionEvent actionEvent) throws IOException, JDOMException {
-        Document doc = getXMLDocumentFromServer(this.username,this.email,"HISTORY");
-        System.out.println(doc);
     }
 
     public void startNewMatch(ActionEvent actionEvent) throws IOException, JDOMException {
@@ -113,28 +228,26 @@ public class ChessView {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        TextField nameField = new TextField();
-        TextField timeField = new TextField();
+        TextField userField = new TextField();
+        TextField emailField = new TextField();
 
-        grid.add(new Label("Email:"), 0, 0);
-        grid.add(nameField, 1, 0);
+        grid.add(new Label("Opponent username:"), 0, 0);
+        grid.add(userField, 1, 0);
 
-        grid.add(new Label("First move:"), 0, 1);
-        grid.add(timeField, 1, 1);
+        grid.add(new Label("Opponent Email:"), 0, 1);
+        grid.add(emailField, 1, 1);
 
         dialog.getDialogPane().setContent(grid);
 
         AtomicBoolean isCanceled = new AtomicBoolean(false);
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton.getButtonData().isDefaultButton()) {
-                return new Pair<>(nameField.getText(), timeField.getText());
+                return new Pair<>(userField.getText(), emailField.getText());
             }
             if (dialogButton.getButtonData().isCancelButton()) {
                 isCanceled.set(true);
                 return null;
             }
-
-
             return null;
         });
 
@@ -145,30 +258,38 @@ public class ChessView {
 
         if (dialogPair == null
                 || dialogPair.getKey().isBlank()
-                || dialogPair.getValue().isBlank()
-                || !dialogPair.getValue().matches(CHESS_NOTATION_REGEX)) {
+                || dialogPair.getValue().isBlank()) {
             return;
         }
 
-        Pair<String, String> emailMove = new Pair<>(dialogPair.getKey(), dialogPair.getValue());
-        System.out.println(emailMove);
+        Pair<String, String> oppenentPair = new Pair<>(dialogPair.getKey(), dialogPair.getValue());
+        System.out.println(oppenentPair);
 
-
-//        Document doc = getXMLDocumentFromServer(this.username,this.email,"MATCH");
-//        System.out.println(doc);
-    }
-
-    private Document getXMLDocumentFromServer(String username, String email, String command) throws IOException, JDOMException {
-        ProtocolBuilder protocolBuilder = new ProtocolBuilder("Message")
-                .addHeader(username, email, command)
-                .addBody();
-
-        String xml = protocolBuilder.toString();
+        String xml = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<!DOCTYPE message>" +
+                "<message>" +
+                    "<header>" +
+                        "<protocol>" +
+                            "<type/>" +
+                            "<version>1.0</version>" +
+                            "<command>START</command>" +
+                        "</protocol>" +
+                        "<id>" +
+                            "<username>%s</username>" +
+                            "<email>%s</email>" +
+                        "</id>" +
+                    "</header>" +
+                    "<body>" +
+                        "<challenger>" +
+                            "<username>%s</username>" +
+                            "<email>%s</email>" +
+                        "</challenger>" +
+                        "<opponent>" +
+                            "<username>%s</username>" +
+                            "<email>%s</email>" +
+                        "</opponent>" +
+                    "</body>" +
+                "</message>").formatted(username, this.email,username, this.email,oppenentPair.getKey(),oppenentPair.getValue());
         sender.println(xml);
-
-        String message = receiver.readLine();
-        System.out.println(message);
-        StringReader charStream = new StringReader(message);
-        return new SAXBuilder().build(charStream);
     }
 }

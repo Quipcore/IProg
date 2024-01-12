@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE message>
+<message>
+    <header>
+        <protocol>
+            <type/>
+            <version>1.0</version>
+            <command>RESPONSE</command>
+        </protocol>
+        <id>
+            <username>server</username>
+            <email/>
+        </id>
+    </header>
+    <body>
+        <game>
+            <id>1234567890</id>
+            <fen>rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</fen>
+            <time>0987654321</time>
+        </game>
+    </body>
+</message>

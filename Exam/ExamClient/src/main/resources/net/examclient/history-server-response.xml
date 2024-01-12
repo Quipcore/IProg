@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE message>
+<message>
+    <header>
+        <protocol>
+            <type/>
+            <version>1.0</version>
+            <command>RESPONSE</command>
+        </protocol>
+        <id>
+            <username>server</username>
+            <email/>
+        </id>
+    </header>
+    <body>
+        <game>
+            <id>1</id>
+            <player_white>felixlido</player_white>
+            <player_black>123</player_black>
+            <fen>rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</fen>
+            <is_active>true</is_active>
+            <time>2024-01-11 19:25:15.0</time>
+        </game>
+        <game><id>2</id><player_white>felixlido</player_white><player_black>123</player_black><fen>rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</fen><result>null</result><is_active>true</is_active><time>2024-01-11 19:27:22.0</time></game><game><id>4</id><player_white>felixlido</player_white><player_black>123</player_black><fen>rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</fen><result>null</result><is_active>true</is_active><time>2024-01-11 19:29:27.0</time></game><game><id>5</id><player_white>felixlido</player_white><player_black>123</player_black><fen>rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</fen><result>null</result><is_active>true</is_active><time>2024-01-11 19:34:15.0</time></game></body></message>
