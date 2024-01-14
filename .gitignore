@@ -1,9 +1,10 @@
 ### Other ###
 *.iml
 **/old/
-**/password
+#**/password
 **/target
-**/credentials
+#**/credentials
+**/*.docx
 
 
 ### IntelliJ IDEA ###
